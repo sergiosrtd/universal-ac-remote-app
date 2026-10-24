@@ -8,6 +8,17 @@ Expo ships breaking changes every SDK release. APIs you remember are likely rena
 2. Fetch the matching versioned docs: `https://docs.expo.dev/versions/v<major>.0.0/`
 3. For anything else, fetch https://docs.expo.dev/llms.txt — an index of all Expo docs with corrections to common LLM misconceptions. Follow its links to the specific page you need; never answer from memory.
 
+## Senior-friendly UI is mandatory
+
+This app is designed for older adults (grandparents) first. Every screen, component, and string must follow [docs/style-guide.md](docs/style-guide.md). Read it before any UI work. These rules are not optional:
+
+- Use the tokens in `src/constants/theme.ts` (`Typography`, `Layout`, `Borders`, `Colors`) and never hard-code `fontSize`, colors, or sizes in screens. If a token is missing, add it there.
+- Build UI from `src/components/ui/` (`AppText`, `Button`, `OptionButton`, `ListCard`, `TextField`, `Section`). Never use a raw `<Text>`, `<TextInput>`, or an unstyled `Pressable` button.
+- No text smaller than `Typography.caption` (17pt). Every tappable element is at least `Layout.minTouchTarget` (64pt), with `Layout.touchGap` between neighbors.
+- Every button has a visible text label. Icons support the words and never replace them. Selected and on/off states must be visible without color (check mark, thick outline, or text).
+- Write plain, everyday words. Don't rely on gestures, timers, or pop-up dialogs. Destructive actions use the in-place two-step confirmation (see `RemoveRemote`).
+- When a rule changes, update `docs/style-guide.md` and the tokens in the same change.
+
 ## Commands
 
 Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).

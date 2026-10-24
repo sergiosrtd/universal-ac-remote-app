@@ -88,7 +88,16 @@ Rules:
 - Leave decorative titles off screens whose content already says what they are. The Remotes list
   is the home screen and its tab is already named, so it starts straight with the remotes.
 
-## 7. Motion and feedback
+## 7. Removing things and other destructive actions
+
+- Never remove anything on a single tap. The first tap ("Remove this remote") asks in place, on the same screen. A
+  pop-up is easy to dismiss by accident and doesn't work on web.
+- The question names the item and says what happens: "Remove “Bedroom LG”? It will disappear from your list.
+  Your air conditioner is not affected."
+- The two answers are full sentences, stacked: **"Yes, remove it"** (`danger`) and **"No, keep it"** (`secondary`).
+- Destructive buttons sit at the bottom of the screen, away from everyday controls.
+
+## 8. Motion and feedback
 
 - Press feedback is a subtle scale (`Motion.pressScale = 0.97`) plus an optional light vibration.
   Users can turn the vibration off in Settings.
@@ -96,11 +105,12 @@ Rules:
   `accessibilityLiveRegion`.
 - No auto-advancing screens, timers, or carousels.
 
-## 8. Accessibility checklist for every new screen
+## 9. Accessibility checklist for every new screen
 
 - [ ] No text smaller than `caption`. No raw `fontSize` in screens.
 - [ ] Every tappable element is at least 64pt, with at least 12pt between neighbors.
 - [ ] Every button has a text label and an `accessibilityLabel`.
 - [ ] Selected and on/off states are visible without color.
 - [ ] Section titles use `accessibilityRole="header"`.
+- [ ] Destructive actions use the two-step in-place confirmation.
 - [ ] The screen works with the phone's text size at its largest, and in both light and dark mode.
