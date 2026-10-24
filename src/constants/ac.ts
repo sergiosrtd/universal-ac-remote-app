@@ -12,16 +12,14 @@ export interface OptionMeta {
   label: string;
   /** SF Symbol name (iOS) / Material Symbol name (Android) for the control icon. */
   icon: IconName;
-  /** A few plain words saying what the option does, shown under the label. */
-  description?: string;
 }
 
 export const MODE_META: Record<AcMode, OptionMeta> = {
-  cool: { label: 'Cool', description: 'Cold air', icon: { sf: 'snowflake', md: 'ac_unit' } },
-  heat: { label: 'Heat', description: 'Warm air', icon: { sf: 'sun.max.fill', md: 'sunny' } },
-  dry: { label: 'Dry', description: 'Less damp', icon: { sf: 'drop.fill', md: 'water_drop' } },
-  fan: { label: 'Fan', description: 'Air only', icon: { sf: 'fan.fill', md: 'mode_fan' } },
-  auto: { label: 'Auto', description: 'AC decides', icon: { sf: 'arrow.triangle.2.circlepath', md: 'autorenew' } },
+  cool: { label: 'Cool', icon: { sf: 'snowflake', md: 'ac_unit' } },
+  heat: { label: 'Heat', icon: { sf: 'sun.max.fill', md: 'sunny' } },
+  dry: { label: 'Dry', icon: { sf: 'drop.fill', md: 'water_drop' } },
+  fan: { label: 'Fan', icon: { sf: 'fan.fill', md: 'mode_fan' } },
+  auto: { label: 'Auto', icon: { sf: 'arrow.triangle.2.circlepath', md: 'autorenew' } },
 };
 
 export const FAN_SPEED_META: Record<FanSpeed, OptionMeta> = {

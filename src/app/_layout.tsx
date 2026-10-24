@@ -10,6 +10,7 @@ import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/button';
 import { Spacing, Typography } from '@/constants/theme';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { useTranslation } from '@/i18n';
 import { useStoresHydrated } from '@/store';
 
 SplashScreen.preventAutoHideAsync();
@@ -17,6 +18,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const hydrated = useStoresHydrated();
   const { scheme, colors } = useAppTheme();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (hydrated) SplashScreen.hideAsync();
@@ -52,13 +54,13 @@ export default function RootLayout() {
           headerTintColor: colors.text,
           headerTitleStyle: { fontSize: Typography.heading.fontSize, fontWeight: '700' },
           // A written "Back" is clearer than a lone chevron or the previous screen's name.
-          headerBackTitle: 'Back',
+          headerBackTitle: t.navigation.back,
           headerBackButtonDisplayMode: 'generic',
           headerBackTitleStyle: { fontSize: Typography.label.fontSize },
         }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="add-device/[brandId]" options={{ headerShown: true, title: 'Add remote' }} />
-        <Stack.Screen name="remote/[deviceId]" options={{ headerShown: true, title: 'Remote' }} />
+        <Stack.Screen name="add-device/[brandId]" options={{ headerShown: true, title: t.navigation.addRemote }} />
+        <Stack.Screen name="remote/[deviceId]" options={{ headerShown: true, title: t.navigation.remote }} />
       </Stack>
     </ThemeProvider>
   );
@@ -66,15 +68,16 @@ export default function RootLayout() {
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
   return (
     <View style={[styles.errorRoot, { backgroundColor: colors.background }]}>
       <AppText variant="title" style={styles.center}>
-        Something went wrong
+        {t.errorBoundary.title}
       </AppText>
       <AppText color="textSecondary" style={styles.center}>
         {error.message}
       </AppText>
-      <Button label="Try again" onPress={retry} large style={styles.retry} />
+      <Button label={t.errorBoundary.retry} onPress={retry} large style={styles.retry} />
     </View>
   );
 }

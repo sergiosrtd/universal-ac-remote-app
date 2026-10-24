@@ -62,7 +62,8 @@ Rules:
 | `Borders.selected`           | 4     | Selected or focused outline                   |
 
 - Buttons stretch to full width, or share a row with at most one other button.
-- Option grids have at most **two columns**.
+- Text choices (`OptionButton`) are stacked in **one column**. Long words like "Dormitorio" can't wrap, and
+  two columns overflow when the phone's text size is large. Short icon tiles, such as AC modes, may use two columns.
 - Screens use `Spacing.xl` (24) between blocks, so groups are easy to tell apart.
 
 ## 5. Components
@@ -85,6 +86,9 @@ Rules:
 - Offer a safe default for uncertain choices: **"I don't know"** for the model.
 - Error messages say what happened, then the details: "The air conditioner did not get the signal."
 - Write **"Back"** on back buttons, not only a chevron. This is set once in the root stack.
+- The app speaks English and Spanish. Strings live in `src/i18n/`. Spanish addresses the user as **usted**
+  ("Toque aquí para encender"). Language names appear in their own language ("English", "Español"), and the
+  Language choice is the first section in Settings, so someone stuck in the wrong language can still find it.
 - Leave decorative titles off screens whose content already says what they are. The Remotes list
   is the home screen and its tab is already named, so it starts straight with the remotes.
 

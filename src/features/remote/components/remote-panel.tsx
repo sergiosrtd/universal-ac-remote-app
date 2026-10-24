@@ -5,13 +5,13 @@ import { AppText } from '@/components/ui/app-text';
 import { Icon, type IconName } from '@/components/ui/icon';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { Section } from '@/components/ui/section';
-import { MODE_META, createDefaultAcState } from '@/constants/ac';
+import { createDefaultAcState } from '@/constants/ac';
 import { getBrandById } from '@/constants/brands';
-import { roomLabel } from '@/constants/rooms';
 import { Layout, Spacing } from '@/constants/theme';
 import { normalizeAcState } from '@/features/remote/lib/ac-state-reducer';
 import { getTemperatureRange, isTemperatureLocked, resolveCapabilities } from '@/features/remote/lib/capabilities';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { useTranslation } from '@/i18n';
 import { transmitAcInfrared } from '@/services/communication/ir/ir-transport';
 import { usePreferencesStore, useRemoteStore } from '@/store';
 import type { AcCommand, DeviceSyncStatus, SavedDevice } from '@/types';
@@ -40,6 +40,7 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
   const transmissionError = useRemoteStore((s) => s.errors[device.id]);
   const unit = usePreferencesStore((s) => s.temperatureUnit);
   const { colors, radii, borders } = useAppTheme();
+  const { t } = useTranslation();
 
   const state = useMemo(
     () => normalizeAcState(stored ?? createDefaultAcState(0), capabilities),
@@ -59,7 +60,8 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
         useRemoteStore.getState().setStatus(device.id, 'synced');
         return;
       }
-      useRemoteStore.getState().setStatus(device.id, 'error', result.error.message);
+      // Older users get a plain explanation; the technical message is only a fallback.
+      useRemoteStore.getState().setStatus(device.id, 'error', t.sendErrors[result.error.code] ?? result.error.message);
     });
   }
 
@@ -71,7 +73,7 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
     <View style={styles.root}>
       <View style={styles.header}>
         <AppText color="textSecondary" style={styles.headerText}>
-          {brand?.name ?? 'Unknown brand'} · {roomLabel(device.room)}
+          {brand?.name ?? t.common.unknownBrand} · {t.rooms[device.room]}
         </AppText>
         <StatusPill status={status} />
       </View>
@@ -91,7 +93,7 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
           <Icon name={ICONS.error} size={28} color={colors.danger} />
           <View style={styles.bannerText}>
             <AppText variant="label" color="danger">
-              The air conditioner did not get the signal.
+              {t.remote.notSent}
             </AppText>
             <AppText color="text">{transmissionError}</AppText>
           </View>
@@ -101,8 +103,8 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
       <PressableScale
         accessibilityRole="switch"
         accessibilityState={{ checked: state.power }}
-        accessibilityLabel="Power"
-        accessibilityHint={state.power ? 'Turns the air conditioner off' : 'Turns the air conditioner on'}
+        accessibilityLabel={t.remote.power}
+        accessibilityHint={state.power ? t.remote.powerHintOn : t.remote.powerHintOff}
         onPress={() => send({ type: 'power/toggle' })}
         style={[
           styles.power,
@@ -122,10 +124,10 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
         </View>
         <View style={styles.powerCopy}>
           <AppText variant="title" style={{ color: powerFg }}>
-            {state.power ? 'AC is on' : 'AC is off'}
+            {state.power ? t.remote.isOn : t.remote.isOff}
           </AppText>
           <AppText variant="label" style={{ color: powerFg }}>
-            {state.power ? 'Tap here to turn off' : 'Tap here to turn on'}
+            {state.power ? t.remote.tapToTurnOff : t.remote.tapToTurnOn}
           </AppText>
         </View>
       </PressableScale>
@@ -143,27 +145,27 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
         <View style={styles.stepRow}>
           <StepButton
             icon={ICONS.minus}
-            label="Colder"
-            accessibilityLabel="Lower temperature"
+            label={t.remote.colder}
+            accessibilityLabel={t.remote.lowerTemperature}
             disabled={tempLocked || atMin}
             onPress={() => send({ type: 'temperature/decrement' })}
           />
           <StepButton
             icon={ICONS.plus}
-            label="Warmer"
-            accessibilityLabel="Raise temperature"
+            label={t.remote.warmer}
+            accessibilityLabel={t.remote.raiseTemperature}
             disabled={tempLocked || atMax}
             onPress={() => send({ type: 'temperature/increment' })}
           />
         </View>
         <AppText color="textSecondary" style={styles.center}>
           {tempLocked
-            ? 'Fan mode has no temperature.'
-            : `From ${formatTemperature(range.min, unit)} to ${formatTemperature(range.max, unit)}`}
+            ? t.remote.fanHasNoTemperature
+            : t.remote.range(formatTemperature(range.min, unit), formatTemperature(range.max, unit))}
         </AppText>
       </View>
 
-      <Section title="Mode" description={`Now: ${MODE_META[state.mode].label}`}>
+      <Section title={t.remote.mode} description={t.remote.modeNow(t.modes[state.mode].label)}>
         <ModeSelector
           modes={capabilities.modes}
           value={state.mode}
@@ -175,7 +177,7 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
         <PressableScale
           accessibilityRole="switch"
           accessibilityState={{ checked: state.displayLight }}
-          accessibilityLabel="Display light on the air conditioner"
+          accessibilityLabel={t.remote.displayLightA11y}
           onPress={() => send({ type: 'display-light/toggle' })}
           style={[
             styles.light,
@@ -188,8 +190,8 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
           ]}>
           <Icon name={ICONS.light} size={32} color={state.displayLight ? colors.warning : colors.textMuted} />
           <View style={styles.lightCopy}>
-            <AppText variant="label">Display light: {state.displayLight ? 'On' : 'Off'}</AppText>
-            <AppText color="textSecondary">The numbers on the AC itself</AppText>
+            <AppText variant="label">{t.remote.displayLight(state.displayLight)}</AppText>
+            <AppText color="textSecondary">{t.remote.displayLightHelp}</AppText>
           </View>
         </PressableScale>
       ) : null}
@@ -197,32 +199,33 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
       <View style={[styles.hint, { backgroundColor: colors.surfacePressed, borderRadius: radii.lg }]}>
         <Icon name={ICONS.aim} size={28} color={colors.textSecondary} />
         <AppText color="textSecondary" style={styles.hintText}>
-          Point the top of your phone at the air conditioner.
+          {t.remote.aimHint}
         </AppText>
       </View>
     </View>
   );
 }
 
-const STATUS_META: Record<DeviceSyncStatus, { label: string; tone: 'textSecondary' | 'primary' | 'success' | 'danger' }> = {
-  idle: { label: 'Ready', tone: 'textSecondary' },
-  sending: { label: 'Sending…', tone: 'primary' },
-  synced: { label: 'Sent', tone: 'success' },
-  error: { label: 'Not sent', tone: 'danger' },
+const STATUS_TONE: Record<DeviceSyncStatus, 'textSecondary' | 'primary' | 'success' | 'danger'> = {
+  idle: 'textSecondary',
+  sending: 'primary',
+  synced: 'success',
+  error: 'danger',
 };
 
 function StatusPill({ status }: { status: DeviceSyncStatus }) {
   const { colors, radii, borders } = useAppTheme();
-  const meta = STATUS_META[status];
-  const tone = colors[meta.tone];
+  const { t } = useTranslation();
+  const label = t.remote.status[status];
+  const tone = colors[STATUS_TONE[status]];
   return (
     <View
       accessibilityLiveRegion="polite"
-      accessibilityLabel={`Status: ${meta.label}`}
+      accessibilityLabel={t.remote.statusA11y(label)}
       style={[styles.pill, { borderColor: tone, borderWidth: borders.regular, borderRadius: radii.pill }]}>
       <View style={[styles.pillDot, { backgroundColor: tone }]} />
       <AppText variant="label" style={{ color: tone }}>
-        {meta.label}
+        {label}
       </AppText>
     </View>
   );

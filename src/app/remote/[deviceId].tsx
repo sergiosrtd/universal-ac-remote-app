@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Screen } from '@/components/ui/screen';
 import { RemotePanel } from '@/features/remote/components/remote-panel';
 import { RemoveRemote } from '@/features/remote/components/remove-remote';
+import { useTranslation } from '@/i18n';
 import { useDevicesStore } from '@/store';
 import type { DeviceId } from '@/types';
 
@@ -15,14 +16,15 @@ export default function RemoteScreen() {
   const device = useDevicesStore((s) => (deviceId ? s.devices[deviceId as DeviceId] : undefined));
   const router = useRouter();
   const scrollRef = useRef<ScrollViewInstance>(null);
+  const { t } = useTranslation();
 
   if (!device) {
     return (
       <Screen edges={[]}>
-        <Stack.Screen options={{ title: 'Remote' }} />
-        <AppText variant="title">Remote not found</AppText>
-        <AppText color="textSecondary">This remote may have been deleted.</AppText>
-        <Button label="Go back" variant="secondary" onPress={() => router.back()} />
+        <Stack.Screen options={{ title: t.navigation.remote }} />
+        <AppText variant="title">{t.remote.notFound}</AppText>
+        <AppText color="textSecondary">{t.remote.notFoundBody}</AppText>
+        <Button label={t.common.goBack} variant="secondary" onPress={() => router.back()} />
       </Screen>
     );
   }

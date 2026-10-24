@@ -39,6 +39,12 @@
             "backgroundColor": "#0B0F17"
           }
         }
+      ],
+      [
+        "expo-localization",
+        {
+          "supportedLocales": ["en", "es"]
+        }
       ]
     ],
     "experiments": {

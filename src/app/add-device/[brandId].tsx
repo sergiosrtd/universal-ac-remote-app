@@ -10,9 +10,10 @@ import { Screen } from '@/components/ui/screen';
 import { Section } from '@/components/ui/section';
 import { TextField } from '@/components/ui/text-field';
 import { getBrandById } from '@/constants/brands';
-import { ROOM_OPTIONS, roomLabel } from '@/constants/rooms';
+import { ROOM_TYPES } from '@/constants/rooms';
 import { Layout, Spacing } from '@/constants/theme';
 import { BrandMark } from '@/features/brands/components/brand-mark';
+import { useTranslation, type Translations } from '@/i18n';
 import { useDevicesStore } from '@/store';
 import type { RoomType } from '@/types';
 
@@ -22,19 +23,20 @@ export default function AddDeviceScreen() {
   const { brandId } = useLocalSearchParams<{ brandId: string }>();
   const brand = getBrandById(brandId ?? '');
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [room, setRoom] = useState<RoomType>('living-room');
-  const [name, setName] = useState(() => suggestedName('living-room', brand?.name ?? 'AC'));
+  const [name, setName] = useState(() => suggestedName(t, 'living-room', brand?.name ?? 'AC'));
   const [nameEdited, setNameEdited] = useState(false);
   const [modelId, setModelId] = useState<string | undefined>(undefined);
 
   if (!brand) {
     return (
       <Screen edges={[]}>
-        <Stack.Screen options={{ title: 'Add remote', headerShown: true }} />
-        <AppText variant="title">Brand not found</AppText>
-        <AppText color="textSecondary">Go back and choose a brand from the list.</AppText>
-        <Button label="Go back" variant="secondary" onPress={() => router.back()} />
+        <Stack.Screen options={{ title: t.navigation.addRemote, headerShown: true }} />
+        <AppText variant="title">{t.addDevice.brandNotFound}</AppText>
+        <AppText color="textSecondary">{t.addDevice.brandNotFoundBody}</AppText>
+        <Button label={t.common.goBack} variant="secondary" onPress={() => router.back()} />
       </Screen>
     );
   }
@@ -44,7 +46,7 @@ export default function AddDeviceScreen() {
 
   function chooseRoom(next: RoomType) {
     setRoom(next);
-    if (!nameEdited) setName(suggestedName(next, brand?.name ?? 'AC'));
+    if (!nameEdited) setName(suggestedName(t, next, brand?.name ?? 'AC'));
   }
 
   function save() {
@@ -66,47 +68,46 @@ export default function AddDeviceScreen() {
 
   return (
     <Screen scroll edges={[]} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'Add remote', headerShown: true }} />
+      <Stack.Screen options={{ title: t.navigation.addRemote, headerShown: true }} />
       <View style={styles.header}>
         <BrandMark name={brand.name} color={brand.color} size={64} />
         <View style={styles.headerCopy}>
           <AppText variant="title">{brand.name}</AppText>
-          <AppText color="textSecondary">Answer the questions below, then tap Save.</AppText>
+          <AppText color="textSecondary">{t.addDevice.intro}</AppText>
         </View>
       </View>
 
-      <Section title="1. Which room is it in?">
-        <View style={styles.grid} accessibilityRole="radiogroup">
-          {ROOM_OPTIONS.map((option) => (
+      <Section title={t.addDevice.roomQuestion}>
+        <View style={styles.options} accessibilityRole="radiogroup">
+          {ROOM_TYPES.map((option) => (
             <OptionButton
-              key={option.id}
-              label={option.label}
-              selected={option.id === room}
-              onPress={() => chooseRoom(option.id)}
-              style={styles.gridItem}
+              key={option}
+              label={t.rooms[option]}
+              selected={option === room}
+              onPress={() => chooseRoom(option)}
             />
           ))}
         </View>
       </Section>
 
-      <Section title="2. What should we call it?">
+      <Section title={t.addDevice.nameQuestion}>
         <TextField
-          label="Name"
-          hint="This is how it will appear in your list."
+          label={t.addDevice.nameLabel}
+          hint={t.addDevice.nameHint}
           value={name}
           onChangeText={(value) => {
             setNameEdited(true);
             setName(value);
           }}
-          placeholder="Living room AC"
+          placeholder={t.addDevice.namePlaceholder}
           returnKeyType="done"
         />
       </Section>
 
       {brand.models.length > 0 ? (
-        <Section title="3. Which model?" description="Not sure? Leave it on “I don't know”. It works for most units.">
+        <Section title={t.addDevice.modelQuestion} description={t.addDevice.modelHelp}>
           <View style={styles.options} accessibilityRole="radiogroup">
-            <OptionButton label="I don't know" selected={modelId === undefined} onPress={() => setModelId(undefined)} />
+            <OptionButton label={t.addDevice.modelUnknown} selected={modelId === undefined} onPress={() => setModelId(undefined)} />
             {brand.models.map((model) => (
               <OptionButton
                 key={model.id}
@@ -120,10 +121,10 @@ export default function AddDeviceScreen() {
       ) : null}
 
       <View style={styles.footer}>
-        <Button label="Save remote" icon={SAVE_ICON} large disabled={!canSave} onPress={save} />
+        <Button label={t.addDevice.save} icon={SAVE_ICON} large disabled={!canSave} onPress={save} />
         {!canSave ? (
           <AppText color="danger" style={styles.center}>
-            Please type a name first.
+            {t.addDevice.nameRequired}
           </AppText>
         ) : null}
       </View>
@@ -131,16 +132,13 @@ export default function AddDeviceScreen() {
   );
 }
 
-function suggestedName(room: RoomType, brandName: string): string {
-  return `${roomLabel(room)} ${brandName}`;
+function suggestedName(t: Translations, room: RoomType, brandName: string): string {
+  return `${t.rooms[room]} ${brandName}`;
 }
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.lg },
   headerCopy: { flex: 1, gap: Spacing.xs },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Layout.touchGap },
-  // Two per row: wide enough for "Living room" at large text sizes.
-  gridItem: { flexBasis: '45%', flexGrow: 1 },
   options: { gap: Layout.touchGap },
   footer: { gap: Spacing.sm, marginTop: Spacing.md },
   center: { textAlign: 'center' },

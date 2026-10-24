@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import type { IconName } from '@/components/ui/icon';
 import { Layout, Spacing } from '@/constants/theme';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { useTranslation } from '@/i18n';
 import { useDevicesStore, usePreferencesStore, useRemoteStore } from '@/store';
 import type { SavedDevice } from '@/types';
 import { withAlpha } from '@/utils/color';
@@ -27,6 +28,7 @@ export function RemoveRemote({ device, onAsk }: RemoveRemoteProps) {
   const router = useRouter();
   const { colors, radii, borders } = useAppTheme();
   const [confirming, setConfirming] = useState(false);
+  const { t } = useTranslation();
 
   function remove() {
     // Leave the screen first so it never renders "Remote not found" for the removed device.
@@ -40,10 +42,10 @@ export function RemoveRemote({ device, onAsk }: RemoveRemoteProps) {
   if (!confirming) {
     return (
       <Button
-        label="Remove this remote"
+        label={t.removeRemote.button}
         icon={TRASH}
         variant="secondary"
-        accessibilityHint="Asks before removing it"
+        accessibilityHint={t.removeRemote.hint}
         onPress={() => {
           setConfirming(true);
           // Wait a frame so the question has been laid out before scrolling to it.
@@ -65,13 +67,11 @@ export function RemoveRemote({ device, onAsk }: RemoveRemoteProps) {
           borderRadius: radii.lg,
         },
       ]}>
-      <AppText variant="heading">Remove “{device.name}”?</AppText>
-      <AppText>
-        It will disappear from your list. Your air conditioner is not affected, and you can add it again later.
-      </AppText>
+      <AppText variant="heading">{t.removeRemote.question(device.name)}</AppText>
+      <AppText>{t.removeRemote.body}</AppText>
       <View style={styles.actions}>
-        <Button label="Yes, remove it" icon={TRASH} variant="danger" large onPress={remove} />
-        <Button label="No, keep it" variant="secondary" large onPress={() => setConfirming(false)} />
+        <Button label={t.removeRemote.confirm} icon={TRASH} variant="danger" large onPress={remove} />
+        <Button label={t.removeRemote.cancel} variant="secondary" large onPress={() => setConfirming(false)} />
       </View>
     </View>
   );

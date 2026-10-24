@@ -18,6 +18,7 @@ This app is designed for older adults (grandparents) first. Every screen, compon
 - Every button has a visible text label. Icons support the words and never replace them. Selected and on/off states must be visible without color (check mark, thick outline, or text).
 - Write plain, everyday words. Don't rely on gestures, timers, or pop-up dialogs. Destructive actions use the in-place two-step confirmation (see `RemoveRemote`).
 - When a rule changes, update `docs/style-guide.md` and the tokens in the same change.
+- Never hard-code user-facing text. Every string, including accessibility labels and hints, lives in `src/i18n/en.ts` with a matching Spanish entry in `src/i18n/es.ts` (TypeScript fails the build if one is missing). Read strings with `useTranslation()`. Spanish uses the respectful "usted" form.
 
 ## Commands
 

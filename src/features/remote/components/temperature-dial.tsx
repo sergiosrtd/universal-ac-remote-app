@@ -13,6 +13,7 @@ import { Icon } from '@/components/ui/icon';
 import { MODE_META } from '@/constants/ac';
 import { Motion, Spacing, Typography } from '@/constants/theme';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { useTranslation, type Translations } from '@/i18n';
 import type { AcMode, Celsius, TemperatureRange, TemperatureUnit } from '@/types';
 import { withAlpha } from '@/utils/color';
 import { clamp } from '@/utils/math';
@@ -39,6 +40,7 @@ export interface TemperatureDialProps {
 
 export function TemperatureDial({ celsius, range, unit, mode, power, locked }: TemperatureDialProps) {
   const { colors } = useAppTheme();
+  const { t } = useTranslation();
   const accent = power ? colors.mode[mode] : colors.textMuted;
   const span = range.max - range.min;
   const fraction = span > 0 ? clamp((celsius - range.min) / span, 0, 1) : 0;
@@ -57,7 +59,7 @@ export function TemperatureDial({ celsius, range, unit, mode, power, locked }: T
   }));
 
   return (
-    <View style={styles.root} accessible accessibilityLabel={dialLabel(displayValue, unit, mode, power, locked)}>
+    <View style={styles.root} accessible accessibilityLabel={dialLabel(t, displayValue, unit, mode, power, locked)}>
       <View
         style={[
           styles.glow,
@@ -96,7 +98,7 @@ export function TemperatureDial({ celsius, range, unit, mode, power, locked }: T
         <View style={styles.modeRow}>
           <Icon name={MODE_META[mode].icon} size={24} color={accent} />
           <AppText variant="label" style={{ color: accent }}>
-            {MODE_META[mode].label}
+            {t.modes[mode].label}
           </AppText>
         </View>
 
@@ -113,17 +115,24 @@ export function TemperatureDial({ celsius, range, unit, mode, power, locked }: T
         )}
 
         <AppText variant="caption" color="textSecondary">
-          {!power ? 'AC is off' : locked ? 'Fan only' : 'Set to'}
+          {!power ? t.dial.off : locked ? t.dial.fanOnly : t.dial.setTo}
         </AppText>
       </Animated.View>
     </View>
   );
 }
 
-function dialLabel(value: number, unit: TemperatureUnit, mode: AcMode, power: boolean, locked: boolean): string {
-  if (!power) return 'Air conditioner is off';
-  const modeLabel = MODE_META[mode].label;
-  return locked ? `${modeLabel} mode` : `${modeLabel} mode, target ${value} degrees ${unit}`;
+function dialLabel(
+  t: Translations,
+  value: number,
+  unit: TemperatureUnit,
+  mode: AcMode,
+  power: boolean,
+  locked: boolean,
+): string {
+  if (!power) return t.dial.a11yOff;
+  const modeLabel = t.modes[mode].label;
+  return locked ? t.remote.modeA11y(modeLabel) : t.dial.a11yTarget(modeLabel, value, t.dial[unit]);
 }
 
 const styles = StyleSheet.create({

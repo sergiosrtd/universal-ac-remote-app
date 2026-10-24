@@ -1,14 +1,16 @@
 import { AppText } from '@/components/ui/app-text';
 import { Screen } from '@/components/ui/screen';
 import { BrandPicker } from '@/features/brands/components/brand-picker';
+import { useTranslation } from '@/i18n';
 
 export default function BrandsScreen() {
+  const { t } = useTranslation();
   return (
     <Screen>
       <AppText variant="title" accessibilityRole="header">
-        Add a remote
+        {t.brands.title}
       </AppText>
-      <AppText color="textSecondary">Find the brand name printed on your air conditioner, then tap it.</AppText>
+      <AppText color="textSecondary">{t.brands.intro}</AppText>
       <BrandPicker />
     </Screen>
   );

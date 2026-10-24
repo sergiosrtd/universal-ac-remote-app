@@ -15,6 +15,7 @@ export type PreferencesStore = UserPreferences & PreferencesActions;
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
   theme: 'system',
+  language: 'system',
   temperatureUnit: 'celsius',
   hapticsEnabled: true,
   simulationMode: false,
@@ -30,7 +31,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
     }),
     {
       name: StorageKeys.preferences,
-      version: 2,
+      version: 3,
       storage: persistStorage,
       skipHydration: isWebServer,
       migrate: (persisted, version) => {
@@ -39,8 +40,9 @@ export const usePreferencesStore = create<PreferencesStore>()(
         if (version < 2) stored.simulationMode = false;
         return stored;
       },
-      partialize: ({ theme, temperatureUnit, hapticsEnabled, simulationMode, lastActiveDeviceId }) => ({
+      partialize: ({ theme, language, temperatureUnit, hapticsEnabled, simulationMode, lastActiveDeviceId }) => ({
         theme,
+        language,
         temperatureUnit,
         hapticsEnabled,
         simulationMode,

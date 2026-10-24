@@ -7,28 +7,23 @@ import { ListCard } from '@/components/ui/list-card';
 import { TextField } from '@/components/ui/text-field';
 import { Layout, Spacing } from '@/constants/theme';
 import { groupBrands } from '@/features/brands/lib/group-brands';
-import type { ConnectionKind } from '@/types';
+import { useTranslation } from '@/i18n';
 
 import { BrandMark } from './brand-mark';
-
-const CONNECTION_LABEL: Record<ConnectionKind, string> = {
-  ir: 'Infrared',
-  wifi: 'Wi-Fi',
-  bluetooth: 'Bluetooth',
-};
 
 export function BrandPicker() {
   const [query, setQuery] = useState('');
   const groups = useMemo(() => groupBrands(query), [query]);
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.root}>
       <TextField
-        label="Search brands"
+        label={t.brands.searchLabel}
         value={query}
         onChangeText={setQuery}
-        placeholder="For example: Samsung"
+        placeholder={t.brands.searchPlaceholder}
         autoCapitalize="none"
         autoCorrect={false}
         clearButtonMode="always"
@@ -41,21 +36,19 @@ export function BrandPicker() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag">
         {groups.length === 0 ? (
-          <AppText color="textSecondary">
-            No brand called “{query.trim()}”. Check the spelling, or look for it under More brands.
-          </AppText>
+          <AppText color="textSecondary">{t.brands.noMatch(query.trim())}</AppText>
         ) : (
           groups.map((group) => (
-            <View key={group.title} style={styles.group}>
+            <View key={group.id} style={styles.group}>
               <AppText variant="heading" accessibilityRole="header">
-                {group.title}
+                {t.brands.groups[group.id]}
               </AppText>
               {group.brands.map((brand) => (
                 <ListCard
                   key={brand.id}
                   title={brand.name}
-                  subtitle={brand.supportedConnections.map((kind) => CONNECTION_LABEL[kind]).join(' · ')}
-                  accessibilityLabel={`Choose ${brand.name}`}
+                  subtitle={brand.supportedConnections.map((kind) => t.brands.connections[kind]).join(' · ')}
+                  accessibilityLabel={t.brands.choose(brand.name)}
                   leading={<BrandMark name={brand.name} color={brand.color} />}
                   onPress={() => router.push({ pathname: '/add-device/[brandId]', params: { brandId: brand.id } })}
                 />
