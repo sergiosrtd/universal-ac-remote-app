@@ -25,6 +25,24 @@ const caps = (overrides: Partial<AcCapabilities> = {}): AcCapabilities => ({
 
 const brandId = (id: string) => id as BrandId;
 
+/** Code families tried, in order, for brands whose factory is unknown. */
+const UNKNOWN_FACTORY_CODES = ['MIDEA_COOLIX', 'GREE', 'TCL112AC', 'ELECTRA_AC'];
+
+/** An infrared-only brand sold in Latin America, with the code families to try. */
+const genericBrand = (id: string, name: string, color: string, codes: readonly string[] = UNKNOWN_FACTORY_CODES): Brand => ({
+  id: brandId(id),
+  name,
+  color,
+  regions: ['latin-america'],
+  supportedConnections: ['ir'],
+  cloudProviders: [],
+  defaultIr: ir(codes[0]!),
+  irCodes: codes.map((code) => ir(code)),
+  capabilities: caps(),
+  models: [],
+  popular: true,
+});
+
 export const BRANDS: readonly Brand[] = [
   {
     id: brandId('samsung'),
@@ -49,6 +67,8 @@ export const BRANDS: readonly Brand[] = [
     supportedConnections: ['ir', 'wifi'],
     cloudProviders: ['lg-thinq'],
     defaultIr: ir('LG2'),
+    // Current LG remotes use LG2; older ones (and GE-built units) the original LG timing.
+    irCodes: [ir('LG2'), ir('LG')],
     capabilities: caps({
       temperature: { min: 18, max: 30, step: 1 },
       verticalSwing: ['off', 'auto', 'top', 'upper', 'middle', 'lower', 'bottom'],
@@ -78,7 +98,7 @@ export const BRANDS: readonly Brand[] = [
       { id: 'arc433', name: 'ARC433 remote', ir: ir('DAIKIN') },
       { id: 'arc466', name: 'ARC466 remote', ir: ir('DAIKIN2') },
     ],
-    popular: true,
+    popular: false,
   },
   {
     id: brandId('panasonic'),
@@ -93,7 +113,7 @@ export const BRANDS: readonly Brand[] = [
       horizontalSwing: ['off', 'auto', 'left', 'center', 'right'],
     }),
     models: [],
-    popular: true,
+    popular: false,
   },
   {
     id: brandId('mitsubishi-electric'),
@@ -109,7 +129,7 @@ export const BRANDS: readonly Brand[] = [
       horizontalSwing: ['off', 'auto', 'left', 'center', 'right', 'wide'],
     }),
     models: [],
-    popular: true,
+    popular: false,
   },
   {
     id: brandId('fujitsu'),
@@ -124,7 +144,7 @@ export const BRANDS: readonly Brand[] = [
       horizontalSwing: ['off', 'auto'],
     }),
     models: [],
-    popular: true,
+    popular: false,
   },
   {
     id: brandId('carrier'),
@@ -139,7 +159,7 @@ export const BRANDS: readonly Brand[] = [
     // CARRIER_AC64 sends the Coolix, Midea and Carrier 64-bit frames together, which
     // covers Midea- and Surrey-built units. Toshiba-Carrier (e.g. 42NQV/38NYV) and
     // Gree-built Carrier units each need their own code.
-    irCodes: [ir('CARRIER_AC64'), ir('TOSHIBA_AC'), ir('GREE')],
+    irCodes: [ir('CARRIER_AC64'), ir('TOSHIBA_AC'), ir('GREE'), ir('TCL112AC')],
     capabilities: caps({ temperature: { min: 17, max: 30, step: 1 } }),
     models: [],
     popular: true,
@@ -157,7 +177,7 @@ export const BRANDS: readonly Brand[] = [
       horizontalSwing: ['off', 'auto', 'left', 'center', 'right', 'wide'],
     }),
     models: [],
-    popular: true,
+    popular: false,
   },
   {
     id: brandId('midea'),
@@ -171,7 +191,7 @@ export const BRANDS: readonly Brand[] = [
     irCodes: [ir('MIDEA'), ir('COOLIX')],
     capabilities: caps({ temperature: { min: 17, max: 30, step: 1 } }),
     models: [],
-    popular: false,
+    popular: true,
   },
   {
     id: brandId('haier'),
@@ -229,10 +249,22 @@ export const BRANDS: readonly Brand[] = [
     supportedConnections: ['ir', 'wifi'],
     cloudProviders: ['tuya'],
     defaultIr: ir('ELECTRA_AC'),
+    // Electrolux sources units from AUX (Electra code), TCL and Midea.
+    irCodes: [ir('ELECTRA_AC'), ir('TCL112AC'), ir('MIDEA_COOLIX')],
     capabilities: caps(),
     models: [],
-    popular: false,
+    popular: true,
   },
+  // Brands common in Mexico and Latin America. They are built by other factories
+  // (often Midea, Gree, TCL or AUX), so the code finder tries each family in turn.
+  genericBrand('tcl', 'TCL', '#E4002B', ['TCL112AC', 'MIDEA_COOLIX']),
+  genericBrand('tokyo', 'Tokyo', '#C8102E'),
+  genericBrand('goodweather', 'Goodweather', '#0077C8'),
+  genericBrand('fama', 'Fama', '#00843D'),
+  genericBrand('jam', 'JAM', '#5B2C83'),
+  genericBrand('altech', 'Altech', '#1D4F91'),
+  genericBrand('electrostar', 'Electrostar', '#F2A900'),
+  genericBrand('prae', 'PRAE', '#2E8B57'),
 ];
 
 const brandIndex = new Map<string, Brand>(BRANDS.map((brand) => [brand.id, brand]));

@@ -5,39 +5,53 @@ import { AppError, err, ok, type AcCommand, type AcState, type Result } from '@/
 
 import { encodeCarrierAc64, type IrFrame } from './encode-carrier-ac64';
 import { encodeCoolix, encodeCoolixLightToggle } from './encode-coolix';
+import { encodeElectra } from './encode-electra';
 import { encodeGree } from './encode-gree';
+import { encodeLg } from './encode-lg';
 import { encodeMidea } from './encode-midea';
+import { encodeSamsung } from './encode-samsung';
+import { encodeTcl } from './encode-tcl';
 import { encodeToshiba } from './encode-toshiba';
-
-const CARRIER_PROTOCOLS = new Set(['CARRIER_AC', 'CARRIER_AC64']);
 
 let transmitQueue: Promise<void> = Promise.resolve();
 
-export function encodeIrFrame(protocol: string, state: AcState): IrFrame | null {
-  if (CARRIER_PROTOCOLS.has(protocol)) return encodeCarrierAc64(state);
-  if (protocol === 'MIDEA') return encodeMidea(state);
-  if (protocol === 'COOLIX') return encodeCoolix(state);
-  if (protocol === 'TOSHIBA_AC') return encodeToshiba(state);
-  if (protocol === 'GREE') return encodeGree(state);
-  return null;
-}
-
-const SUPPORTED_PROTOCOLS = new Set([...CARRIER_PROTOCOLS, 'MIDEA', 'COOLIX', 'TOSHIBA_AC', 'GREE']);
-
-/** Whether this app can encode the protocol. Unsupported ones are skipped by the code finder. */
-export const isIrProtocolSupported = (protocol: string): boolean => SUPPORTED_PROTOCOLS.has(protocol);
+const isPowerCommand = (command?: AcCommand): boolean =>
+  !command || command.type === 'power/toggle' || command.type === 'power/set';
 
 /**
- * Carrier-branded splits ship with Coolix, Midea 48-bit, or Carrier/Surrey 64-bit
- * receivers depending on the OEM. Each receiver ignores the frames it can't decode.
+ * Frames to send for one change. Protocol names follow IRremoteESP8266.
+ * Combined codes send several frames; each receiver ignores the ones it can't decode.
  */
+const ENCODERS: Record<string, (state: AcState, command?: AcCommand) => IrFrame[]> = {
+  // Carrier-branded splits ship with Coolix, Midea 48-bit or Carrier/Surrey 64-bit
+  // receivers depending on the OEM. CARRIER_AC is the name older saved remotes use.
+  CARRIER_AC64: (state, command) =>
+    command?.type === 'display-light/toggle'
+      ? [encodeCoolixLightToggle()]
+      : [encodeCoolix(state), encodeMidea(state), encodeCarrierAc64(state)],
+  CARRIER_AC: (state, command) => ENCODERS.CARRIER_AC64!(state, command),
+  // Midea-built units under other brand names answer one of these two.
+  MIDEA_COOLIX: (state, command) =>
+    command?.type === 'display-light/toggle'
+      ? [encodeCoolixLightToggle()]
+      : [encodeCoolix(state), encodeMidea(state)],
+  MIDEA: (state) => [encodeMidea(state)],
+  COOLIX: (state) => [encodeCoolix(state)],
+  TOSHIBA_AC: (state) => [encodeToshiba(state)],
+  GREE: (state) => [encodeGree(state)],
+  LG: (state) => [encodeLg(state, 'LG')],
+  LG2: (state) => [encodeLg(state, 'LG2')],
+  // Power changes need Samsung's longer "extended" message.
+  SAMSUNG_AC: (state, command) => [encodeSamsung(state, isPowerCommand(command))],
+  TCL112AC: (state) => [encodeTcl(state)],
+  ELECTRA_AC: (state, command) => [encodeElectra(state, command?.type === 'display-light/toggle')],
+};
+
+/** Whether this app can encode the protocol. Unsupported ones are skipped by the code finder. */
+export const isIrProtocolSupported = (protocol: string): boolean => protocol in ENCODERS;
+
 export function encodeIrFrames(protocol: string, state: AcState, command?: AcCommand): IrFrame[] {
-  if (CARRIER_PROTOCOLS.has(protocol)) {
-    if (command?.type === 'display-light/toggle') return [encodeCoolixLightToggle()];
-    return [encodeCoolix(state), encodeMidea(state), encodeCarrierAc64(state)];
-  }
-  const frame = encodeIrFrame(protocol, state);
-  return frame ? [frame] : [];
+  return ENCODERS[protocol]?.(state, command) ?? [];
 }
 
 /** Send one infrared frame. Calls are serialized so two presses cannot overlap on the emitter. */

@@ -49,7 +49,7 @@ export default function RemotesScreen() {
                 .filter(Boolean)
                 .join(' · ')}
               accessibilityLabel={t.remotes.open(device.name)}
-              leading={<BrandMark name={brand?.name ?? device.name} color={brand?.color} />}
+              leading={<BrandMark brandId={device.brandId} name={brand?.name ?? device.name} color={brand?.color} />}
               onPress={() => router.push({ pathname: '/remote/[deviceId]', params: { deviceId: device.id } })}
             />
           );

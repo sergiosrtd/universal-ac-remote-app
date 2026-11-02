@@ -63,6 +63,8 @@ export interface ThemeColors {
   powerOn: string;
   powerOff: string;
   overlay: string;
+  /** Light tile behind brand logos. Logos are drawn for light backgrounds, so it stays light in dark mode. */
+  logoPlate: string;
   mode: Record<AcMode, string>;
 }
 
@@ -87,6 +89,7 @@ export const Colors: Record<ResolvedTheme, ThemeColors> = {
     powerOn: palette.leaf700,
     powerOff: palette.red700,
     overlay: 'rgba(11, 15, 23, 0.5)',
+    logoPlate: palette.white,
     mode: {
       cool: palette.blue700,
       heat: palette.ember700,
@@ -115,6 +118,8 @@ export const Colors: Record<ResolvedTheme, ThemeColors> = {
     powerOn: palette.leaf400,
     powerOff: palette.red400,
     overlay: 'rgba(0, 0, 0, 0.6)',
+    // Slightly off-white so it doesn't glare against the dark background.
+    logoPlate: palette.slate100,
     mode: {
       cool: palette.ice400,
       heat: palette.ember400,

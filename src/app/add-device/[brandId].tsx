@@ -68,7 +68,7 @@ export default function AddDeviceScreen() {
     <Screen scroll edges={[]} keyboardShouldPersistTaps="handled">
       <Stack.Screen options={{ title: t.navigation.addRemote, headerShown: true }} />
       <View style={styles.header}>
-        <BrandMark name={brand.name} color={brand.color} size={64} />
+        <BrandMark brandId={brand.id} name={brand.name} color={brand.color} size={64} />
         <View style={styles.headerCopy}>
           <AppText variant="title">{brand.name}</AppText>
           <AppText color="textSecondary">{t.addDevice.intro}</AppText>

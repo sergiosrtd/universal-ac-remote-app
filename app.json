@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Universal AC Remote",
-    "slug": "universal-ac-control",
+    "slug": "control-universal-de-aire-acondicionado",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,9 +9,14 @@
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#0B0F17",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.universalac.remote",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "CFBundleLocalizations": [
+          "en",
+          "es"
+        ]
+      }
     },
     "android": {
       "package": "com.universalac.remote",
@@ -55,6 +60,17 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "2d6e8216-720b-4401-ae4d-e560e22ea307"
+      }
+    },
+    "owner": "ambeeziuscwl"
   }
 }

@@ -49,7 +49,7 @@ export function BrandPicker() {
                   title={brand.name}
                   subtitle={brand.supportedConnections.map((kind) => t.brands.connections[kind]).join(' · ')}
                   accessibilityLabel={t.brands.choose(brand.name)}
-                  leading={<BrandMark name={brand.name} color={brand.color} />}
+                  leading={<BrandMark brandId={brand.id} name={brand.name} color={brand.color} />}
                   onPress={() => router.push({ pathname: '/add-device/[brandId]', params: { brandId: brand.id } })}
                 />
               ))}
