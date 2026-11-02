@@ -45,7 +45,9 @@ export default function RemotesScreen() {
             <ListCard
               key={device.id}
               title={device.name}
-              subtitle={`${brand?.name ?? t.common.unknownBrand} · ${t.rooms[device.room]}`}
+              subtitle={[brand?.name ?? t.common.unknownBrand, device.room === 'other' ? null : t.rooms[device.room]]
+                .filter(Boolean)
+                .join(' · ')}
               accessibilityLabel={t.remotes.open(device.name)}
               leading={<BrandMark name={brand?.name ?? device.name} color={brand?.color} />}
               onPress={() => router.push({ pathname: '/remote/[deviceId]', params: { deviceId: device.id } })}

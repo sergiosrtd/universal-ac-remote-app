@@ -73,7 +73,8 @@ export function RemotePanel({ device }: { device: SavedDevice }) {
     <View style={styles.root}>
       <View style={styles.header}>
         <AppText color="textSecondary" style={styles.headerText}>
-          {brand?.name ?? t.common.unknownBrand} · {t.rooms[device.room]}
+          {brand?.name ?? t.common.unknownBrand}
+          {device.room === 'other' ? null : ` · ${t.rooms[device.room]}`}
         </AppText>
         <StatusPill status={status} />
       </View>

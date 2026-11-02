@@ -21,12 +21,19 @@ export const SUPPORTED_LANGUAGES = Object.keys(TRANSLATIONS) as Language[];
 const isLanguage = (code: string | null | undefined): code is Language =>
   !!code && (SUPPORTED_LANGUAGES as string[]).includes(code);
 
-/** The language in use: the saved choice, else the first supported phone language, else English. */
+export const getTranslations = (language: Language): Translations => TRANSLATIONS[language];
+
+/** The first supported language in the phone's settings, else English. */
+export function usePhoneLanguage(): Language {
+  const locales = useLocales();
+  return locales.map((locale) => locale.languageCode).find(isLanguage) ?? 'en';
+}
+
+/** The language in use: the saved choice, else the phone's language. */
 export function useLanguage(): Language {
   const preference = usePreferencesStore((s) => s.language);
-  const locales = useLocales();
-  if (preference !== 'system') return preference;
-  return locales.map((locale) => locale.languageCode).find(isLanguage) ?? 'en';
+  const phoneLanguage = usePhoneLanguage();
+  return preference === 'system' ? phoneLanguage : preference;
 }
 
 export function useTranslation(): { t: Translations; language: Language } {

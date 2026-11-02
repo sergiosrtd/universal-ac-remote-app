@@ -82,13 +82,15 @@ Rules:
 
 - Use everyday words: **Colder / Warmer**, not "−/+". Write **"AC is off. Tap here to turn on"**, not
   "Standby".
-- Phrase steps as questions: "1. Which room is it in?", "2. What should we call it?"
+- Phrase steps as questions: "1. What should we call it?", "2. Which model?". Ask only what is needed.
 - Offer a safe default for uncertain choices: **"I don't know"** for the model.
 - Error messages say what happened, then the details: "The air conditioner did not get the signal."
 - Write **"Back"** on back buttons, not only a chevron. This is set once in the root stack.
 - The app speaks English and Spanish. Strings live in `src/i18n/`. Spanish addresses the user as **usted**
   ("Toque aquí para encender"). Language names appear in their own language ("English", "Español"), and the
   Language choice is the first section in Settings, so someone stuck in the wrong language can still find it.
+  On first launch, the app asks for the language before anything else, with the question written in every language
+  and the phone's language first.
 - Leave decorative titles off screens whose content already says what they are. The Remotes list
   is the home screen and its tab is already named, so it starts straight with the remotes.
 

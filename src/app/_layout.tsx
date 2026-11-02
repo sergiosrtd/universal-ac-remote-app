@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Spacing, Typography } from '@/constants/theme';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { useTranslation } from '@/i18n';
-import { useStoresHydrated } from '@/store';
+import { usePreferencesStore, useStoresHydrated } from '@/store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,6 +19,7 @@ export default function RootLayout() {
   const hydrated = useStoresHydrated();
   const { scheme, colors } = useAppTheme();
   const { t } = useTranslation();
+  const languageChosen = usePreferencesStore((s) => s.languageChosen);
 
   useEffect(() => {
     if (hydrated) SplashScreen.hideAsync();
@@ -58,9 +59,16 @@ export default function RootLayout() {
           headerBackButtonDisplayMode: 'generic',
           headerBackTitleStyle: { fontSize: Typography.label.fontSize },
         }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="add-device/[brandId]" options={{ headerShown: true, title: t.navigation.addRemote }} />
-        <Stack.Screen name="remote/[deviceId]" options={{ headerShown: true, title: t.navigation.remote }} />
+        {/* The first launch asks for a language before anything else. Picking one flips the guards. */}
+        <Stack.Protected guard={!languageChosen}>
+          <Stack.Screen name="welcome" />
+        </Stack.Protected>
+        <Stack.Protected guard={languageChosen}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="add-device/[brandId]" options={{ headerShown: true, title: t.navigation.addRemote }} />
+          <Stack.Screen name="remote/[deviceId]" options={{ headerShown: true, title: t.navigation.remote }} />
+          <Stack.Screen name="find-code/[deviceId]" options={{ headerShown: true, title: t.navigation.findCode }} />
+        </Stack.Protected>
       </Stack>
     </ThemeProvider>
   );

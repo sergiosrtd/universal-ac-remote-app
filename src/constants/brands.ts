@@ -136,6 +136,10 @@ export const BRANDS: readonly Brand[] = [
     // Surrey and most Latin American Carrier splits use the 64-bit frame.
     // Saved remotes that still say CARRIER_AC are encoded the same way.
     defaultIr: ir('CARRIER_AC64'),
+    // CARRIER_AC64 sends the Coolix, Midea and Carrier 64-bit frames together, which
+    // covers Midea- and Surrey-built units. Toshiba-Carrier (e.g. 42NQV/38NYV) and
+    // Gree-built Carrier units each need their own code.
+    irCodes: [ir('CARRIER_AC64'), ir('TOSHIBA_AC'), ir('GREE')],
     capabilities: caps({ temperature: { min: 17, max: 30, step: 1 } }),
     models: [],
     popular: true,
@@ -163,6 +167,8 @@ export const BRANDS: readonly Brand[] = [
     supportedConnections: ['ir', 'wifi'],
     cloudProviders: ['midea-msmart'],
     defaultIr: ir('MIDEA'),
+    // Midea-built units answer either the 48-bit Midea or the 24-bit Coolix code.
+    irCodes: [ir('MIDEA'), ir('COOLIX')],
     capabilities: caps({ temperature: { min: 17, max: 30, step: 1 } }),
     models: [],
     popular: false,

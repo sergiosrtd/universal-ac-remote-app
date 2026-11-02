@@ -5,7 +5,9 @@ import { AppError, err, ok, type AcCommand, type AcState, type Result } from '@/
 
 import { encodeCarrierAc64, type IrFrame } from './encode-carrier-ac64';
 import { encodeCoolix, encodeCoolixLightToggle } from './encode-coolix';
+import { encodeGree } from './encode-gree';
 import { encodeMidea } from './encode-midea';
+import { encodeToshiba } from './encode-toshiba';
 
 const CARRIER_PROTOCOLS = new Set(['CARRIER_AC', 'CARRIER_AC64']);
 
@@ -15,8 +17,15 @@ export function encodeIrFrame(protocol: string, state: AcState): IrFrame | null 
   if (CARRIER_PROTOCOLS.has(protocol)) return encodeCarrierAc64(state);
   if (protocol === 'MIDEA') return encodeMidea(state);
   if (protocol === 'COOLIX') return encodeCoolix(state);
+  if (protocol === 'TOSHIBA_AC') return encodeToshiba(state);
+  if (protocol === 'GREE') return encodeGree(state);
   return null;
 }
+
+const SUPPORTED_PROTOCOLS = new Set([...CARRIER_PROTOCOLS, 'MIDEA', 'COOLIX', 'TOSHIBA_AC', 'GREE']);
+
+/** Whether this app can encode the protocol. Unsupported ones are skipped by the code finder. */
+export const isIrProtocolSupported = (protocol: string): boolean => SUPPORTED_PROTOCOLS.has(protocol);
 
 /**
  * Carrier-branded splits ship with Coolix, Midea 48-bit, or Carrier/Surrey 64-bit

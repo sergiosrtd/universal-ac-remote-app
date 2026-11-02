@@ -10,12 +10,11 @@ import { Screen } from '@/components/ui/screen';
 import { Section } from '@/components/ui/section';
 import { TextField } from '@/components/ui/text-field';
 import { getBrandById } from '@/constants/brands';
-import { ROOM_TYPES } from '@/constants/rooms';
 import { Layout, Spacing } from '@/constants/theme';
 import { BrandMark } from '@/features/brands/components/brand-mark';
-import { useTranslation, type Translations } from '@/i18n';
+import { getIrCodeCandidates } from '@/features/remote/lib/ir-codes';
+import { useTranslation } from '@/i18n';
 import { useDevicesStore } from '@/store';
-import type { RoomType } from '@/types';
 
 const SAVE_ICON: IconName = { sf: 'checkmark', md: 'check' };
 
@@ -25,9 +24,7 @@ export default function AddDeviceScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [room, setRoom] = useState<RoomType>('living-room');
-  const [name, setName] = useState(() => suggestedName(t, 'living-room', brand?.name ?? 'AC'));
-  const [nameEdited, setNameEdited] = useState(false);
+  const [name, setName] = useState(() => t.addDevice.defaultName(brand?.name ?? 'AC'));
   const [modelId, setModelId] = useState<string | undefined>(undefined);
 
   if (!brand) {
@@ -44,17 +41,13 @@ export default function AddDeviceScreen() {
   const selectedModel = brand.models.find((model) => model.id === modelId);
   const canSave = name.trim().length > 0;
 
-  function chooseRoom(next: RoomType) {
-    setRoom(next);
-    if (!nameEdited) setName(suggestedName(t, next, brand?.name ?? 'AC'));
-  }
-
   function save() {
     const trimmed = name.trim();
     if (!brand || !trimmed) return;
     const device = useDevicesStore.getState().addDevice({
       name: trimmed,
-      room,
+      // The room question was removed to keep setup short; the name says where it is.
+      room: 'other',
       brandId: brand.id,
       modelId: selectedModel?.id,
       connection: {
@@ -63,7 +56,12 @@ export default function AddDeviceScreen() {
         emitter: 'builtin',
       },
     });
-    router.replace({ pathname: '/remote/[deviceId]', params: { deviceId: device.id } });
+    // With more than one possible code, find the one this unit understands before showing the remote.
+    if (getIrCodeCandidates(device).length > 1) {
+      router.replace({ pathname: '/find-code/[deviceId]', params: { deviceId: device.id, from: 'add' } });
+    } else {
+      router.replace({ pathname: '/remote/[deviceId]', params: { deviceId: device.id } });
+    }
   }
 
   return (
@@ -77,28 +75,12 @@ export default function AddDeviceScreen() {
         </View>
       </View>
 
-      <Section title={t.addDevice.roomQuestion}>
-        <View style={styles.options} accessibilityRole="radiogroup">
-          {ROOM_TYPES.map((option) => (
-            <OptionButton
-              key={option}
-              label={t.rooms[option]}
-              selected={option === room}
-              onPress={() => chooseRoom(option)}
-            />
-          ))}
-        </View>
-      </Section>
-
       <Section title={t.addDevice.nameQuestion}>
         <TextField
           label={t.addDevice.nameLabel}
           hint={t.addDevice.nameHint}
           value={name}
-          onChangeText={(value) => {
-            setNameEdited(true);
-            setName(value);
-          }}
+          onChangeText={setName}
           placeholder={t.addDevice.namePlaceholder}
           returnKeyType="done"
         />
@@ -130,10 +112,6 @@ export default function AddDeviceScreen() {
       </View>
     </Screen>
   );
-}
-
-function suggestedName(t: Translations, room: RoomType, brandName: string): string {
-  return `${t.rooms[room]} ${brandName}`;
 }
 
 const styles = StyleSheet.create({

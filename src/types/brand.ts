@@ -71,6 +71,11 @@ export interface Brand {
   supportedConnections: readonly ConnectionKind[];
   cloudProviders: readonly CloudProvider[];
   defaultIr: IrProtocolDescriptor;
+  /**
+   * Every IR code family the brand's units are known to use, most common first.
+   * The code finder tries them one by one. Defaults to `[defaultIr]`.
+   */
+  irCodes?: readonly IrProtocolDescriptor[];
   capabilities: AcCapabilities;
   models: readonly AcModelProfile[];
   /** Surfaced first in the brand selector. */
